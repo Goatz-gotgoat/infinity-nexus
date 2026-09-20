@@ -1,0 +1,296 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Infinity Nexus</title>
+<style>
+  body{background:#05070d;color:#e8eef7;font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  .panel{position:absolute;background:rgba(10,14,22,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px}
+  #title{top:16px;left:16px;max-width:280px}
+  #title h1{margin:0 0 4px 0;font-size:15px}
+  #title .sub{color:#8aa0bd;font-size:12px}
+  #legend{top:16px;right:16px;font-size:12px}
+  .row{display:flex;align-items:center;gap:8px;padding:3px 0}
+  .sw{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 10px currentColor}
+  #controls{bottom:16px;left:16px;font-size:12px;color:#8aa0bd}
+  kbd{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;color:#e8eef7;font-family:inherit;font-size:11px}
+</style>
+<div id="app"></div>
+<div id="title" class="panel">
+  <h1>Soul · Ego · Consciousness</h1>
+  <div class="sub">The body is part of the environment and apart from it. Everything else flows from that nexus.</div>
+</div>
+<div id="legend" class="panel">
+  <div class="row"><span class="sw" style="background:#2a7fd6;color:#2a7fd6"></span>Environment</div>
+  <div class="row"><span class="sw" style="background:#65d98b;color:#65d98b"></span>Soul</div>
+  <div class="row"><span class="sw" style="background:#ffb84a;color:#ffb84a"></span>Ego</div>
+  <div class="row"><span class="sw" style="background:#efe9f4;color:#c9b3e5;box-shadow:0 0 8px currentColor"></span>Consciousness</div>
+  <div class="row"><span class="sw" style="background:#b45050;color:#b45050"></span>Body</div>
+  <div class="row"><span class="sw" style="background:#ffffff;color:#ffffff;box-shadow:0 0 14px #ffffff, 0 0 4px #ffffff"></span>Nexus</div>
+  <div class="row"><svg width="28" height="12" viewBox="0 0 28 12" style="flex-shrink:0"><line x1="4" y1="6" x2="24" y2="6" stroke="#ffffff" stroke-width="5" opacity="0.18" stroke-linecap="round"/><line x1="6" y1="6" x2="22" y2="6" stroke="#ffffff" stroke-width="1" opacity="0.4"/><polygon points="0,6 7,2.5 7,9.5" fill="#ffffff" style="filter:drop-shadow(0 0 3px #ffffff)"/><polygon points="28,6 21,2.5 21,9.5" fill="#ffffff" style="filter:drop-shadow(0 0 3px #ffffff)"/></svg>∞ flow</div>
+</div>
+<div id="controls" class="panel"><kbd>drag</kbd> orbit · <kbd>scroll</kbd> zoom</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
+  cam.position.set(22, 8, 26);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x05070d, 1);
+  document.getElementById('app').appendChild(renderer.domElement);
+  const controls = new THREE.OrbitControls(cam, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.06;
+  controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
+
+  // Nexus: bright glowing point where Body and Environment surfaces meet
+  {
+    const NX = new THREE.Vector3(0, 0, -14);
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(0.35, 32, 24),
+      new THREE.MeshBasicMaterial({color:0xffffff})
+    );
+    core.position.copy(NX); scene.add(core);
+    const halo1 = new THREE.Mesh(
+      new THREE.SphereGeometry(0.9, 32, 24),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false})
+    );
+    halo1.position.copy(NX); scene.add(halo1);
+    const halo2 = new THREE.Mesh(
+      new THREE.SphereGeometry(2.0, 32, 24),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false})
+    );
+    halo2.position.copy(NX); scene.add(halo2);
+    const nexusLight = new THREE.PointLight(0xffffff, 2.5, 30);
+    nexusLight.position.copy(NX); scene.add(nexusLight);
+
+    // Formula encoded onto the Nexus itself. At default zoom the sprite reads
+    // as a faint additional halo; zoom in on the Nexus and the equation resolves.
+    const fCanvas = document.createElement('canvas');
+    fCanvas.width = 1024; fCanvas.height = 192;
+    const fctx = fCanvas.getContext('2d');
+    fctx.clearRect(0, 0, 1024, 192);
+    fctx.fillStyle = 'rgba(255,255,255,0.95)';
+    fctx.font = 'italic 74px "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif';
+    fctx.textAlign = 'center';
+    fctx.textBaseline = 'middle';
+    fctx.fillText('Ω  =  Ω  ⊕  ε(Ω)   ·   ε  ≢  0', 512, 96);
+    const fTex = new THREE.CanvasTexture(fCanvas);
+    fTex.needsUpdate = true;
+    const fMat = new THREE.SpriteMaterial({
+      map: fTex,
+      transparent: true,
+      opacity: 0.85,
+      depthTest: false,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const formulaSprite = new THREE.Sprite(fMat);
+    formulaSprite.position.copy(NX);
+    formulaSprite.scale.set(2.4, 0.45, 1);
+    scene.add(formulaSprite);
+  }
+
+  scene.add(new THREE.AmbientLight(0x4a6a90, 0.6));
+  const key = new THREE.DirectionalLight(0xffffff, 1.0); key.position.set(10, 15, 10); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x88b8ff, 0.4); rim.position.set(-15, -5, -10); scene.add(rim);
+
+  // Group all toroidal + infinity-loop elements so we can rotate them together.
+  const rig = new THREE.Group();
+  rig.rotation.x = -Math.PI/2;         // 90° vertical, plus 180° flip (east→west)
+  rig.position.set(0, 0, -14);          // swept 180° around the Body to the opposite pole
+  scene.add(rig);
+
+  function torus(R, tube, color, opacity, emissive){
+    const t = new THREE.Mesh(
+      new THREE.TorusGeometry(R, tube, 32, 200),
+      new THREE.MeshPhongMaterial({color, transparent:true, opacity, depthWrite:false, emissive:color, emissiveIntensity:emissive, shininess:60, side:THREE.DoubleSide})
+    );
+    rig.add(t); return t;
+  }
+  torus(5.0,  0.50, 0xc9b3e5, 0.30, 0.22);           // Consciousness (substrate — pale crown-chakra violet; visible encapsulation, still least salient)
+  const soulMesh = torus(4.85, 0.15, 0x65d98b, 0.95, 0.6);   // Soul (opacity animated)
+  const egoMesh  = torus(5.15, 0.15, 0xffb84a, 0.95, 0.55);  // Ego  (opacity animated, out of phase)
+
+  // Environment sphere: large, translucent, centered at origin.
+  // Encloses everything; Body sits inside it, touching its inner surface at the bottom pole.
+  {
+    const R = 14;
+    const eg = new THREE.Group();
+    eg.add(new THREE.Mesh(
+      new THREE.SphereGeometry(R, 64, 48),
+      new THREE.MeshPhongMaterial({color:0x2a7fd6, transparent:true, opacity:0.05, depthWrite:false, side:THREE.BackSide})
+    ));
+    eg.add(new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.SphereGeometry(R, 24, 16)),
+      new THREE.LineBasicMaterial({color:0x2a7fd6, transparent:true, opacity:0.14, depthWrite:false})
+    ));
+    scene.add(eg);
+  }
+
+  // Body sphere. TWO copies, one inside Environment and one outside. They crossfade:
+  // as one dematerializes, the other materializes at the opposite pose, so the total
+  // "presence" is roughly conserved and it doesn't read as a teleport/glitch.
+  // Encodes metaphysical neutrality: the interface (Nexus) is invariant; only the Body's
+  // placement relative to the field varies.
+  function makeBody(z){
+    const R = 7.0;
+    const g = new THREE.Group();
+    g.position.set(0, 0, z);
+    const fillMat = new THREE.MeshPhongMaterial({color:0xb45050, transparent:true, opacity:0, depthWrite:false, side:THREE.BackSide});
+    const wireMat = new THREE.LineBasicMaterial({color:0xb45050, transparent:true, opacity:0, depthWrite:false});
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(R, 64, 48), fillMat));
+    g.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(R, 24, 16)), wireMat));
+    scene.add(g);
+    return {group:g, fillMat, wireMat};
+  }
+  const bodyInside  = makeBody(-7);
+  const bodyOutside = makeBody(-21);
+  const BODY_FILL_OPACITY = 0.10;
+  const BODY_WIRE_OPACITY = 0.22;
+  const BODY_CYCLE_S = 9.0;
+
+  // Infinity loop crossing at the Soul-Ego tangent point (5, 0, 0).
+  // Lobes extend vertically (in z), above and below the tori plane,
+  // so the curve runs OUTSIDE the Consciousness ring rather than through Soul/Ego.
+  const CX = 0, A = 5.0;   // lobe tips reach exactly the Soul-Ego tangent circle (r=5.00), threading between them
+  function at(u){
+    const t = u * Math.PI*2;
+    const s = Math.sin(t), c = Math.cos(t);
+    const d = 1 + s*s;
+    // Key-rotated: main and tangential axes swapped → loop is now vertical instead of horizontal
+    return new THREE.Vector3(CX, A*c/d, A*s*c/d);
+  }
+  // tangent for orienting arrows
+  function tangent(u){
+    const e = 0.001;
+    return at((u+e)%1).clone().sub(at((u-e+1)%1)).normalize();
+  }
+
+  const pts = [];
+  for (let i=0; i<=400; i++) pts.push(at(i/400));
+  const smallCurve = new THREE.CatmullRomCurve3(pts, true);
+  const smallLoopMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, depthWrite:false});
+  const smallLoopMesh = new THREE.Mesh(new THREE.TubeGeometry(smallCurve, 300, 0.08, 10, true), smallLoopMat);
+  rig.add(smallLoopMesh);
+
+  // Arrow heads (cones) running along the loop
+  const arrows = [];
+  const N = 12;
+  const arrowGeom = new THREE.ConeGeometry(0.11, 0.34, 12);
+  arrowGeom.translate(0, -0.17, 0);
+  arrowGeom.rotateX(Math.PI/2);
+  const arrowMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:1.0});
+  for (let i=0; i<N; i++){
+    const m = new THREE.Mesh(arrowGeom, arrowMat);
+    rig.add(m);
+    arrows.push({mesh:m, u: i/N, dir: (i < N/2 ? 1 : -1)});
+  }
+
+  // Bright marker at the crossing point (Soul-Ego tangent)
+  const cross = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 16, 16),
+    new THREE.MeshBasicMaterial({color:0xffffff})
+  );
+  cross.position.set(CX, 0, 0);
+  rig.add(cross);
+  const crossHalo = new THREE.Mesh(
+    new THREE.SphereGeometry(0.25, 16, 16),
+    new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false})
+  );
+  crossHalo.position.set(CX, 0, 0);
+  rig.add(crossHalo);
+  void 0;
+
+  // Larger figure-8: crossing at the Nexus (0, 0, -14), lying in the ring's plane (x-z),
+  // with lobes extending outward around the ring on either side.
+  const NEX = new THREE.Vector3(0, 0, -14);
+  const BIG_A = 7;   // one lobe tip reaches Body center (0, 0, -7), exactly 7 units up from Nexus
+  function bigAt(u){
+    const t = u * Math.PI*2;
+    const s = Math.sin(t), c = Math.cos(t);
+    const d = 1 + s*s;
+    // Oriented same as the small loop (in world x=0 plane, main lobes along z), forming concentric figure-8s
+    return new THREE.Vector3(0, BIG_A*s*c/d, -14 - BIG_A*c/d);
+  }
+  function bigTangent(u){
+    const e = 0.001;
+    return bigAt((u+e)%1).clone().sub(bigAt((u-e+1)%1)).normalize();
+  }
+  const pts2 = [];
+  for (let i=0; i<=500; i++) pts2.push(bigAt(i/500));
+  const bigCurve = new THREE.CatmullRomCurve3(pts2, true);
+  const bigLoopMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, depthWrite:false});
+  const bigLoopMesh = new THREE.Mesh(new THREE.TubeGeometry(bigCurve, 400, 0.10, 10, true), bigLoopMat);
+  scene.add(bigLoopMesh);
+
+  const bigArrows = [];
+  const BN = 16;
+  const bigArrowMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:1.0});
+  for (let i=0; i<BN; i++){
+    const m = new THREE.Mesh(arrowGeom, bigArrowMat);
+    scene.add(m);
+    bigArrows.push({mesh:m, u: i/BN, dir: (i < BN/2 ? 1 : -1)});
+  }
+
+  const up = new THREE.Vector3(0,1,0);
+  const forward = new THREE.Vector3(0,0,1);
+  addEventListener('resize', () => {
+    cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+  let clock = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    clock += 0.02;
+    controls.update();
+
+    // Alternating flash: small loop and large loop breathe out of phase
+    const flashSmall = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(clock * 2.4));
+    const flashBig   = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(clock * 2.4 + Math.PI));
+    smallLoopMat.opacity = flashSmall;
+    arrowMat.opacity     = flashSmall;
+    bigLoopMat.opacity   = flashBig;
+    bigArrowMat.opacity  = flashBig;
+
+    // Soul and Ego pulse out of phase with each other, synchronized with the small loop's cycle:
+    // the trajectory alternately visits each basin, so each attractor's salience fluctuates.
+    soulMesh.material.opacity = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(clock * 2.4));
+    egoMesh.material.opacity  = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(clock * 2.4 + Math.PI));
+
+    // Body: crossfade between "inside Environment" and "outside Environment".
+    // Inside opacity peaks at phase 0/1, outside opacity peaks at phase 0.5.
+    // The two are complementary. As one dematerializes, the other is materializing.
+    {
+      const phase = (clock / BODY_CYCLE_S) % 1;
+      const insideWeight  = 0.5 + 0.5 * Math.cos(phase * Math.PI * 2);
+      const outsideWeight = 1 - insideWeight;
+      bodyInside.fillMat.opacity  = BODY_FILL_OPACITY * insideWeight;
+      bodyInside.wireMat.opacity  = BODY_WIRE_OPACITY * insideWeight;
+      bodyOutside.fillMat.opacity = BODY_FILL_OPACITY * outsideWeight;
+      bodyOutside.wireMat.opacity = BODY_WIRE_OPACITY * outsideWeight;
+    }
+
+    arrows.forEach(a => {
+      a.u = (a.u + a.dir * 0.0022 + 1) % 1;
+      const p = at(a.u);
+      const t = tangent(a.u).multiplyScalar(a.dir);
+      a.mesh.position.copy(p);
+      a.mesh.quaternion.setFromUnitVectors(forward, t);
+    });
+    bigArrows.forEach(a => {
+      a.u = (a.u + a.dir * 0.0014 + 1) % 1;
+      const p = bigAt(a.u);
+      const t = bigTangent(a.u).multiplyScalar(a.dir);
+      a.mesh.position.copy(p);
+      a.mesh.quaternion.setFromUnitVectors(forward, t);
+    });
+    renderer.render(scene, cam);
+  }
+  animate();
+})();
+</script>
+
+</body></html>
